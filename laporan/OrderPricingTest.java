@@ -1,12 +1,12 @@
 package marketplace;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class OrderPricingTest {
 
@@ -92,6 +92,18 @@ class OrderPricingTest {
         assertEquals(25_000, pricing.hitungOngkir(5.1, false), DELTA);
     }
 
+    @ParameterizedTest(name = "berat {0} kg -> ongkir {1}")
+    @CsvSource({
+            "0.01, 10000",
+            "0.99, 10000",
+            "4.99, 20000",
+            "5.01, 25000"
+    })
+    @DisplayName("Ongkir pada nilai batas tambahan (BVA)")
+    void ongkirNilaiBatasTambahan(double beratKg, double diharapkan) {
+        assertEquals(diharapkan, pricing.hitungOngkir(beratKg, false), DELTA);
+    }
+
     @Test
     @DisplayName("Berat 7 kg: Rp20.000 + ceil(2) × Rp5.000 = Rp30.000")
     void ongkirTierTigaVerifikasiFormula() {
@@ -129,6 +141,7 @@ class OrderPricingTest {
             "0,  BARU",
             "4,  BARU",
             "5,  REGULER",
+            "6,  REGULER",
             "19, REGULER",
             "20, LOYAL",
             "21, LOYAL"

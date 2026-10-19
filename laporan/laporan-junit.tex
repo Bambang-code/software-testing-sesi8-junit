@@ -20,6 +20,15 @@
 
 \definecolor{headrow}{HTML}{EDEDED}
 
+% ===== ISI DARI KELUARAN mvn test TERBARU (lalu hapus tanda kurung siku) =====
+\newcommand{\waktutest}{0,145}    % mis. 0,19 -> "Time elapsed" pada baris Tests run
+\newcommand{\waktubuild}{3,847}   % mis. 4,1  -> "Total time"
+\newcommand{\selesaipada}{19 Oktober 2026, 16:34:46 (UTC+7)}  % mis. 19 Oktober 2026, 16:05:12 (UTC+7) -> "Finished at"
+% ==============================================================================
+
+% Bukti gambar: bila berkas PNG belum ada, tampil kotak penanda
+\newcommand{\buktigambar}[1]{\IfFileExists{#1}{\includegraphics[width=\textwidth]{#1}}{\fbox{\parbox{0.9\textwidth}{\centering\vspace{3em}\textbf{[Tempatkan #1 di sini]}\vspace{3em}}}}}
+
 \setstretch{1.12}
 \emergencystretch=2em
 \setlength{\parskip}{4pt}
@@ -91,10 +100,10 @@ Unit testing menguji bagian terkecil kode yang dapat diuji, yaitu method atau cl
 \toprule
 \hrow \textbf{No} & \textbf{Ketentuan} & \textbf{Pemenuhan} \\
 \midrule
-1 & Minimal 8 test, termasuk 1 \texttt{@ParameterizedTest} berbasis BVA & 15 method test (26 kasus uji), 2 di antaranya parameterized berbasis BVA \\
+1 & Minimal 8 test, termasuk 1 \texttt{@ParameterizedTest} berbasis BVA & 16 method test (31 kasus uji), 3 di antaranya parameterized berbasis BVA \\
 2 & Minimal 2 test \texttt{assertThrows} untuk skenario negatif & 4 method test dengan 4 pemanggilan \texttt{assertThrows}, semua memverifikasi pesan exception \\
 3 & Penggunaan \texttt{@BeforeEach} dan \texttt{@DisplayName} & \texttt{setUp()} dengan \texttt{@BeforeEach}; semua test memakai \texttt{@DisplayName} \\
-4 & Tangkapan layar hasil \texttt{mvn test} yang lulus seluruhnya & Gambar~\ref{fig:mvn}: 26 test lulus, \texttt{BUILD SUCCESS} \\
+4 & Tangkapan layar hasil \texttt{mvn test} yang lulus seluruhnya & Gambar~\ref{fig:mvn}: 31 test lulus, \texttt{BUILD SUCCESS} \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -131,11 +140,11 @@ Data uji ditentukan dengan Equivalence Partitioning (EP) dan Boundary Value Anal
 \texttt{hitung\allowbreak Total\allowbreak Setelah\allowbreak Diskon} & 0; 99.999; 100.000; 100.001; 499.999; 500.000; 500.001 & 0; 99.999; 95.000; 95.000,95; 474.999,05; 450.000; 450.000,90 \\
  & $-1$ & \texttt{IllegalArgumentException} (``Subtotal negatif'') \\
 \addlinespace
-\texttt{hitungOngkir} & 1 kg; 1,01 kg; 5 kg; 5,1 kg; 7 kg (reguler) & Rp10.000; Rp20.000; Rp20.000; Rp25.000; Rp30.000 \\
+\texttt{hitungOngkir} & 0,01 kg; 0,99 kg; 1 kg; 1,01 kg; 4,99 kg; 5 kg; 5,01 kg; 5,1 kg; 7 kg (reguler) & Rp10.000; Rp10.000; Rp10.000; Rp20.000; Rp20.000; Rp20.000; Rp25.000; Rp25.000; Rp30.000 \\
  & 1 kg (ekspres) & Rp15.000 \\
  & 0 kg; $-2{,}5$ kg & \texttt{IllegalArgumentException} (``Berat harus lebih dari 0'') \\
 \addlinespace
-\texttt{klasifikasi\allowbreak Pelanggan} & 0; 4; 5; 19; 20; 21 & BARU; BARU; REGULER; REGULER; LOYAL; LOYAL \\
+\texttt{klasifikasi\allowbreak Pelanggan} & 0; 4; 5; 6; 19; 20; 21 & BARU; BARU; REGULER; REGULER; REGULER; LOYAL; LOYAL \\
  & $-1$ & \texttt{IllegalArgumentException} (``Jumlah pesanan negatif'') \\
 \bottomrule
 \end{tabularx}
@@ -154,7 +163,7 @@ Pengujian skenario negatif disertakan pada setiap method, karena test yang hanya
 \texttt{@Test} & Menandai method sebagai test biasa. \\
 \texttt{@BeforeEach} & \texttt{setUp()} membuat objek \texttt{OrderPricing} baru sebelum tiap test (tahap Arrange), sehingga tidak ada keadaan yang terbawa antar test. \\
 \texttt{@DisplayName} & Nama test yang mudah dibaca pada laporan, ada di semua test. \\
-\texttt{@ParameterizedTest} dan \texttt{@CsvSource} & Satu logika test dijalankan dengan tabel data hasil BVA (7 kasus untuk diskon, 6 kasus untuk klasifikasi). \\
+\texttt{@ParameterizedTest} dan \texttt{@CsvSource} & Satu logika test dijalankan dengan tabel data hasil BVA (7 kasus untuk diskon, 4 kasus untuk ongkir, 7 kasus untuk klasifikasi). \\
 \texttt{assertEquals} & Membandingkan hasil dengan nilai harapan. Untuk tipe \texttt{double} dipakai toleransi (delta) 0,001. \\
 \texttt{assertThrows} & Memastikan input tidak valid melempar \texttt{IllegalArgumentException}; semua test exception memverifikasi pesan galat dengan \texttt{assertEquals} pada \texttt{getMessage()}. \\
 \bottomrule
@@ -178,14 +187,15 @@ Setiap test mengikuti pola Arrange-Act-Assert: objek disiapkan oleh \texttt{setU
 7 & \texttt{ongkirTepatDiAtasSatuKilo} & BVA: 1,01 kg (tepat di atas batas tier 1) & 1 \\
 8 & \texttt{ongkirTepatDiBatasLimaKilo} & BVA: 5 kg (batas atas tier 2) & 1 \\
 9 & \texttt{ongkirTepatDiAtasLimaKilo} & BVA: 5,1 kg (tepat di atas batas tier 2) & 1 \\
-10 & \texttt{ongkirTierTigaVerifikasiFormula} & Verifikasi formula tier 3: 7 kg & 1 \\
-11 & \texttt{ongkirEkspres} & Tarif ekspres 1,5 kali & 1 \\
-12 & \texttt{beratNolDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
-13 & \texttt{beratNegatifDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
-14 & \texttt{klasifikasiNilaiBatas} & \texttt{@ParameterizedTest} BVA klasifikasi & 6 \\
-15 & \texttt{jumlahPesananNegatifDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
+10 & \texttt{ongkirNilaiBatasTambahan} & \texttt{@ParameterizedTest} BVA ongkir: 0,01; 0,99; 4,99; 5,01 kg & 4 \\
+11 & \texttt{ongkirTierTigaVerifikasiFormula} & Verifikasi formula tier 3: 7 kg & 1 \\
+12 & \texttt{ongkirEkspres} & Tarif ekspres 1,5 kali & 1 \\
+13 & \texttt{beratNolDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
+14 & \texttt{beratNegatifDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
+15 & \texttt{klasifikasiNilaiBatas} & \texttt{@ParameterizedTest} BVA klasifikasi & 7 \\
+16 & \texttt{jumlahPesananNegatifDitolak} & Negatif: \texttt{assertThrows} dan pesan galat & 1 \\
 \midrule
- & \textbf{Total} & & \textbf{26} \\
+ & \textbf{Total} & & \textbf{31} \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -201,7 +211,8 @@ Kode lengkap test class tersedia pada Lampiran B.
 \hrow \textbf{Komponen} & \textbf{Versi} \\
 \midrule
 Sistem operasi & Windows 11 (amd64) \\
-JDK & Eclipse Temurin 21.0.9 \\
+JDK & Eclipse Temurin (Adoptium) 21.0.9 \\
+Target kompilasi & Java 17 (\texttt{maven.compiler.release}) \\
 Build tool & Apache Maven 3.10.0 \\
 Plugin test & maven-surefire-plugin 3.2.5 \\
 Framework test & JUnit Jupiter 5.10.2 (\texttt{junit-jupiter}, mencakup modul \texttt{params}) \\
@@ -211,20 +222,27 @@ Editor & Visual Studio Code \\
 \end{center}
 
 \subsection{Hasil mvn test}
-Pengujian dijalankan dengan perintah \texttt{mvn test} dari folder proyek yang berisi \texttt{pom.xml}. Hasilnya ditunjukkan pada Gambar~\ref{fig:mvn}.
+Pengujian dijalankan di PowerShell dari folder proyek yang berisi \texttt{pom.xml}. Karena Maven belum terdaftar permanen pada \texttt{PATH}, direktori \texttt{bin} Maven ditambahkan terlebih dahulu untuk sesi terminal tersebut, lalu \texttt{mvn test} dijalankan:
+
+\begin{lstlisting}[language={}, numbers=none, frame=single, breaklines=true]
+$env:Path += ";C:\maven\apache-maven-3.10.0-bin\apache-maven-3.10.0\bin"
+mvn test
+\end{lstlisting}
+
+Hasilnya ditunjukkan pada Gambar~\ref{fig:mvn}.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{bukti-terminal.png}
-  \caption{Keluaran terminal \texttt{mvn test}: \texttt{Tests run: 26, Failures: 0, Errors: 0, Skipped: 0} dan \texttt{BUILD SUCCESS}.}
+  \buktigambar{bukti-terminal.png}
+  \caption{Keluaran terminal \texttt{mvn test}: \texttt{Tests run: 31, Failures: 0, Errors: 0, Skipped: 0} dan \texttt{BUILD SUCCESS}.}
   \label{fig:mvn}
 \end{figure}
 
-Gambar~\ref{fig:vscode} menampilkan tangkapan layar utuh pada saat yang sama, termasuk struktur proyek (\texttt{src/main}, \texttt{src/test}, \texttt{pom.xml}) dan status editor tanpa galat maupun peringatan (0 error, 0 warning).
+Gambar~\ref{fig:vscode} menampilkan tangkapan layar utuh pada saat yang sama, termasuk struktur proyek (\texttt{src/main}, \texttt{src/test}, \texttt{pom.xml}) dan status editor tanpa galat kompilasi (0 error).
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{bukti-mvn-test.png}
+  \buktigambar{bukti-mvn-test.png}
   \caption{Tangkapan layar utuh Visual Studio Code setelah \texttt{mvn test} berhasil.}
   \label{fig:vscode}
 \end{figure}
@@ -234,18 +252,18 @@ Gambar~\ref{fig:vscode} menampilkan tangkapan layar utuh pada saat yang sama, te
 \toprule
 \hrow \textbf{Indikator} & \textbf{Nilai} \\
 \midrule
-Tests run & 26 \\
+Tests run & 31 \\
 Failures & 0 \\
 Errors & 0 \\
 Skipped & 0 \\
-Waktu eksekusi test & 0,185 detik \\
+Waktu eksekusi test & \waktutest\ detik \\
 Status build & BUILD SUCCESS \\
-Total waktu build & 3,976 detik \\
-Selesai pada & 19 Oktober 2026, 15:26:05 (UTC+7) \\
+Total waktu build & \waktubuild\ detik \\
+Selesai pada & \selesaipada \\
 \bottomrule
 \end{tabularx}
 \end{center}
-Angka 26 berasal dari 13 test biasa ditambah 13 kasus pada dua test parameterized (7 kasus diskon dan 6 kasus klasifikasi). Seluruhnya lulus, dan tidak ada test yang dilewati.
+Angka 31 berasal dari 13 test biasa ditambah 18 kasus pada tiga test parameterized (7 kasus diskon, 4 kasus ongkir, dan 7 kasus klasifikasi). Seluruhnya lulus, dan tidak ada test yang dilewati.
 
 % ---------------- 6 ----------------
 \section{Evaluasi terhadap Kriteria Penilaian}
@@ -257,7 +275,7 @@ Angka 26 berasal dari 13 test biasa ditambah 13 kasus pada dua test parameterize
 \hrow \textbf{Kriteria} & \textbf{Bobot} & \textbf{Bukti pada tugas ini} \\
 \midrule
 Ketepatan anotasi dan assertion & 30\% & Anotasi siklus hidup, parameterized, dan \texttt{@DisplayName} dipakai sesuai fungsinya; \texttt{assertEquals} memakai delta untuk \texttt{double}, \texttt{assertThrows} untuk exception dengan verifikasi pesan galat pada semua test negatif. \\
-Cakupan skenario (batas dan negatif) & 35\% & Nilai batas dari BVA di tiga method (di bawah, tepat, dan di atas batas), serta skenario negatif untuk setiap method. \\
+Cakupan skenario (batas dan negatif) & 35\% & Nilai batas dari BVA pada seluruh batas antarkelas di tiga method (tepat di bawah, tepat pada, dan tepat di atas batas), serta skenario negatif untuk setiap method. \\
 Kualitas penamaan dan kepatuhan FIRST & 20\% & Nama method dan \texttt{@DisplayName} deskriptif; prinsip FIRST dibahas pada subbab berikut. \\
 Bukti eksekusi & 15\% & Gambar~\ref{fig:mvn}. \\
 \bottomrule
@@ -270,7 +288,7 @@ Bukti eksekusi & 15\% & Gambar~\ref{fig:mvn}. \\
 \toprule
 \hrow \textbf{Prinsip} & \textbf{Penerapan} \\
 \midrule
-Fast & Seluruh 26 kasus selesai dalam 0,185 detik karena tidak ada akses database, jaringan, atau berkas. \\
+Fast & Seluruh 31 kasus selesai dalam \waktutest\ detik karena tidak ada akses database, jaringan, atau berkas. \\
 Independent & \texttt{@BeforeEach} membuat objek baru untuk tiap test, tidak ada variabel statis yang berubah, sehingga urutan eksekusi tidak berpengaruh. \\
 Repeatable & Tidak bergantung pada waktu, data acak, atau lingkungan eksternal; hasil sama di komputer mana pun. \\
 Self-validating & Setiap test memakai assertion sehingga lulus atau gagal otomatis tanpa pemeriksaan manual. \\
@@ -284,7 +302,7 @@ Penelusuran manual terhadap kode menunjukkan setiap cabang kondisi pada ketiga m
 
 % ---------------- 7 ----------------
 \section{Kesimpulan}
-Class \texttt{OrderPricing} dengan tiga method berlogika bersyarat telah diuji oleh 15 method test (26 kasus uji) memakai JUnit 5. Data uji ditentukan dengan BVA secara konsisten pada semua boundary (batas, tepat di bawah, dan tepat di atas batas) dan dilengkapi skenario negatif untuk tiap method dengan verifikasi pesan exception. Seluruh test lulus pada eksekusi \texttt{mvn test} (26 dijalankan, 0 gagal, 0 error, 0 dilewati), dan rancangan test mengikuti pola Arrange-Act-Assert serta prinsip FIRST. Seluruh ketentuan Tugas Sesi 8 telah terpenuhi.
+Class \texttt{OrderPricing} dengan tiga method berlogika bersyarat telah diuji oleh 16 method test (31 kasus uji) memakai JUnit 5. Data uji ditentukan dengan BVA pada seluruh batas antarkelas di ketiga method (tepat di bawah, tepat pada, dan tepat di atas batas), dan dilengkapi skenario negatif untuk tiap method dengan verifikasi pesan exception. Seluruh test lulus pada eksekusi \texttt{mvn test} (31 dijalankan, 0 gagal, 0 error, 0 dilewati), dan rancangan test mengikuti pola Arrange-Act-Assert serta prinsip FIRST. Seluruh ketentuan Tugas Sesi 8 telah terpenuhi.
 
 % ---------------- Lampiran ----------------
 \clearpage
